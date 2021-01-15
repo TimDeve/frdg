@@ -1,0 +1,13 @@
+[package]
+name = "frdg-server"
+version = "0.1.0"
+authors = ["Tim Dévé <TimDeve@users.noreply.github.com>"]
+edition = "2018"
+
+[dependencies]
+anyhow        = "1"
+async-std     = { version = "1", features = ["attributes"] }
+serde         = "1"
+sqlx          = { version = "0.4", features = ["runtime-async-std-native-tls", "postgres", "migrate"] }
+tide          = "0.15"
+
