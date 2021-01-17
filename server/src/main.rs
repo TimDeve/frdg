@@ -4,8 +4,7 @@ use std::env;
 
 use anyhow::{Context, Result};
 use sqlx::postgres::PgPool;
-use tide::prelude::*;
-use tide::{Body, Request, Server};
+use tide::{prelude::*, Body, Request, Response, Server, StatusCode};
 
 #[derive(Clone)]
 struct AppContext {
@@ -46,8 +45,10 @@ async fn main() -> Result<()> {
 }
 
 fn make_routes(app: &mut Server<AppContext>) {
-    app.at("/api/v0/foods").get(get_foods);
-    app.at("/api/v0/foods").post(create_food);
+    let mut foods_api = app.at("/api/v0/foods");
+    foods_api.get(get_foods);
+    foods_api.post(create_food);
+    foods_api.at("/:id").delete(delete_food);
 }
 
 async fn get_foods(req: Request<AppContext>) -> tide::Result<Body> {
@@ -61,3 +62,11 @@ async fn create_food(mut req: Request<AppContext>) -> tide::Result<Body> {
     Body::from_json(&created_food)
 }
 
+async fn delete_food(req: Request<AppContext>) -> tide::Result<Response> {
+    if let Ok(food_id) = req.param("id")?.parse::<i32>() {
+        repository::delete_food(&req.state().pool, food_id).await?;
+        Ok(Response::new(StatusCode::NoContent))
+    } else {
+        Ok(Response::new(StatusCode::BadRequest))
+    }
+}

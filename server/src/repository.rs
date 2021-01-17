@@ -24,3 +24,12 @@ pub async fn create_food(pool: &PgPool, food: NewFood) -> anyhow::Result<Food> {
         name: food.name,
     })
 }
+
+pub async fn delete_food(pool: &PgPool, id: i32) -> anyhow::Result<()> {
+    sqlx::query("DELETE FROM foods WHERE id = $1;")
+        .bind(id)
+        .execute(pool)
+        .await?;
+
+    Ok(())
+}
