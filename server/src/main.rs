@@ -1,5 +1,5 @@
 mod repository;
-mod iso_date_format;
+mod serde_date;
 
 use std::env;
 
@@ -17,7 +17,7 @@ struct AppContext {
 #[serde(rename_all = "camelCase")]
 pub struct NewFood {
     name: String,
-    #[serde(with = "iso_date_format")]
+    #[serde(with = "serde_date")]
     best_before_date: Date
 }
 
@@ -26,7 +26,7 @@ pub struct NewFood {
 pub struct Food {
     id: i32,
     name: String,
-    #[serde(with = "iso_date_format")]
+    #[serde(with = "serde_date")]
     best_before_date: Date
 }
 
