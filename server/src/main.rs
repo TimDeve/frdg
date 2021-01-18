@@ -1,10 +1,12 @@
 mod repository;
+mod iso_date_format;
 
 use std::env;
 
 use anyhow::{Context, Result};
 use sqlx::postgres::PgPool;
 use tide::{prelude::*, Body, Request, Response, Server, StatusCode};
+use time::Date;
 
 #[derive(Clone)]
 struct AppContext {
@@ -12,14 +14,20 @@ struct AppContext {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct NewFood {
     name: String,
+    #[serde(with = "iso_date_format")]
+    best_before_date: Date
 }
 
 #[derive(Serialize, sqlx::FromRow)]
+#[serde(rename_all = "camelCase")]
 pub struct Food {
     id: i32,
     name: String,
+    #[serde(with = "iso_date_format")]
+    best_before_date: Date
 }
 
 #[derive(Serialize)]
@@ -41,6 +49,7 @@ async fn main() -> Result<()> {
     make_routes(&mut app);
 
     app.listen("127.0.0.1:8080").await?;
+
     Ok(())
 }
 

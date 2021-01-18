@@ -8,6 +8,7 @@ edition = "2018"
 anyhow        = "1"
 async-std     = { version = "1", features = ["attributes"] }
 serde         = "1"
-sqlx          = { version = "0.4", features = ["runtime-async-std-native-tls", "postgres", "migrate"] }
+sqlx          = { version = "0.4", features = ["runtime-async-std-native-tls", "postgres", "migrate", "time"] }
 tide          = "0.15"
+time          = "0.2"
 

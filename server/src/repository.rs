@@ -6,7 +6,7 @@ use crate::{Food, NewFood};
 struct Id(i32);
 
 pub async fn get_foods(pool: &PgPool) -> anyhow::Result<Vec<Food>> {
-    let foods = sqlx::query_as("SELECT id, name FROM foods;")
+    let foods = sqlx::query_as("SELECT id, name, best_before_date FROM foods;")
         .fetch_all(pool)
         .await?;
 
@@ -14,14 +14,16 @@ pub async fn get_foods(pool: &PgPool) -> anyhow::Result<Vec<Food>> {
 }
 
 pub async fn create_food(pool: &PgPool, food: NewFood) -> anyhow::Result<Food> {
-    let Id(id) = sqlx::query_as("INSERT INTO foods ( name ) VALUES ( $1 ) RETURNING id;")
+    let Id(id) = sqlx::query_as("INSERT INTO foods ( name, best_before_date ) VALUES ( $1, $2 ) RETURNING id;")
         .bind(&food.name)
+        .bind(&food.best_before_date)
         .fetch_one(pool)
         .await?;
 
     Ok(Food {
         id,
         name: food.name,
+        best_before_date: food.best_before_date
     })
 }
 
