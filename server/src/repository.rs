@@ -1,6 +1,5 @@
 use sqlx::PgPool;
-
-use crate::{Food, NewFood};
+use crate::domain::{Food, NewFood};
 
 #[derive(sqlx::FromRow)]
 struct Id(i32);
@@ -14,16 +13,18 @@ pub async fn get_foods(pool: &PgPool) -> anyhow::Result<Vec<Food>> {
 }
 
 pub async fn create_food(pool: &PgPool, food: NewFood) -> anyhow::Result<Food> {
-    let Id(id) = sqlx::query_as("INSERT INTO foods ( name, best_before_date ) VALUES ( $1, $2 ) RETURNING id;")
-        .bind(&food.name)
-        .bind(&food.best_before_date)
-        .fetch_one(pool)
-        .await?;
+    let Id(id) = sqlx::query_as(
+        "INSERT INTO foods ( name, best_before_date ) VALUES ( $1, $2 ) RETURNING id;",
+    )
+    .bind(&food.name)
+    .bind(&food.best_before_date)
+    .fetch_one(pool)
+    .await?;
 
     Ok(Food {
         id,
         name: food.name,
-        best_before_date: food.best_before_date
+        best_before_date: food.best_before_date,
     })
 }
 

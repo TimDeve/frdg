@@ -1,5 +1,5 @@
+use serde::{Deserialize, Deserializer, Serializer};
 use time::Date;
-use serde::{self, Deserialize, Deserializer, Serializer};
 
 const ISO_FORMAT: &'static str = "%F"; // "2020-01-30"
 
