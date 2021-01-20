@@ -1,5 +1,5 @@
-use sqlx::PgPool;
 use crate::domain::{Food, NewFood};
+use sqlx::PgPool;
 
 #[derive(sqlx::FromRow)]
 struct Id(i32);

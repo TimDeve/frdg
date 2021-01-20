@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+ln -sf "$(git rev-parse --show-toplevel)/scripts/git-hooks/pre-commit" "$(git rev-parse --show-toplevel)/.git/hooks/pre-commit"

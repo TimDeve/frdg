@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+(cd $(git rev-parse --show-toplevel)/server && cargo fmt)
+
+FILES=$(git diff --cached --name-only --diff-filter=ACMR "*.js" "*.jsx" "*.ts" "*.tsx" "*.css" "*.scss" "*.html"| sed 's| |\\ |g')
+[ -z "$FILES" ] && exit 0
+
+# Prettify all selected files
+echo "$FILES" | xargs $(git rev-parse --show-toplevel)/client/node_modules/.bin/prettier --write
+
+# Add back the modified/prettified files to staging
+echo "$FILES" | xargs git add
+
+exit 0
