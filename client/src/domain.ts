@@ -1,5 +1,5 @@
 export interface Food {
-  id: number,
-  name: string,
+  id: number
+  name: string
   bestBeforeDate: string
 }

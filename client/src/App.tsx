@@ -64,11 +64,21 @@ function FoodList() {
     return <>"Oops, something went wrong!"</>
   }
 
-  return <>{data.map(food => <FoodItem key={food.id} {...food} />)}</>
+  return (
+    <>
+      {data.map((food) => (
+        <FoodItem key={food.id} {...food} />
+      ))}
+    </>
+  )
 }
 
-function FoodItem({id, name, bestBeforeDate}: Food) {
-  return <p >{name} {bestBeforeDate}</p>
+function FoodItem({ name, bestBeforeDate }: Food) {
+  return (
+    <p>
+      {name} {bestBeforeDate}
+    </p>
+  )
 }
 
 function Loading() {
