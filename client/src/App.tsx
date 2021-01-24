@@ -5,8 +5,12 @@ import {
   AppBar,
   Container,
   CssBaseline,
+  Card,
   Toolbar,
   Typography,
+  CardContent,
+  CardActions,
+  Button,
 } from "@material-ui/core"
 
 import { getFoods } from "./gateway"
@@ -54,7 +58,7 @@ function Page() {
 }
 
 function FoodList() {
-  const { isLoading, error, data } = useQuery("foods", getFoods)
+  const { isLoading, error, data } = useQuery(getFoods.name, getFoods)
 
   if (isLoading) {
     return <Loading />
@@ -75,9 +79,19 @@ function FoodList() {
 
 function FoodItem({ name, bestBeforeDate }: Food) {
   return (
-    <p>
-      {name} {bestBeforeDate}
-    </p>
+    <Card style={{ marginTop: "14px", marginBottom: "14px" }}>
+      <CardContent>
+        <Typography color="textSecondary" gutterBottom>
+          Best Before: {bestBeforeDate}
+        </Typography>
+        <Typography variant="h5" component="p">
+          {name}
+        </Typography>
+      </CardContent>
+      <CardActions>
+        <Button size="small">Delete</Button>
+      </CardActions>
+    </Card>
   )
 }
 
