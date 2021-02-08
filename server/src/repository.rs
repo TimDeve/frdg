@@ -1,5 +1,5 @@
 use crate::domain::{Food, NewFood};
-use sqlx::{Executor,Postgres};
+use sqlx::{Executor, Postgres};
 
 #[derive(sqlx::FromRow)]
 struct Id(i32);
@@ -8,9 +8,13 @@ pub async fn get_foods<'a, E>(exec: E) -> anyhow::Result<Vec<Food>>
 where
     E: 'a + Executor<'a, Database = Postgres>,
 {
-    let foods = sqlx::query_as("SELECT id, name, best_before_date FROM foods;")
-        .fetch_all(exec)
-        .await?;
+    let foods = sqlx::query_as(
+        "SELECT id, name, best_before_date
+         FROM foods
+         ORDER BY best_before_date DESC",
+    )
+    .fetch_all(exec)
+    .await?;
 
     Ok(foods)
 }
