@@ -15,3 +15,15 @@ export async function getFoods(): Promise<Food[]> {
     throw e
   }
 }
+
+export async function deleteFood(foodId: number): Promise<void> {
+  try {
+    const res = await fetch(`/api/v0/foods/${foodId}`, {
+      method: "DELETE",
+    })
+    if (!res.ok) throw new Error("Failed to delete food")
+  } catch (e) {
+    console.error(e)
+    throw e
+  }
+}

@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from "react"
-import { QueryClient, QueryClientProvider, useQuery } from "react-query"
+import {
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQuery,
+} from "react-query"
 import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles"
 import {
   AppBar,
@@ -13,7 +18,7 @@ import {
   Button,
 } from "@material-ui/core"
 
-import { getFoods } from "./gateway"
+import { deleteFood, getFoods } from "./gateway"
 import { Food } from "./domain"
 
 const theme = createMuiTheme({
@@ -77,7 +82,13 @@ function FoodList() {
   )
 }
 
-function FoodItem({ name, bestBeforeDate }: Food) {
+function FoodItem({ name, bestBeforeDate, id }: Food) {
+  const { mutateAsync: delFood } = useMutation(deleteFood, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(getFoods.name)
+    },
+  })
+
   return (
     <Card style={{ marginTop: "14px", marginBottom: "14px" }}>
       <CardContent>
@@ -89,7 +100,9 @@ function FoodItem({ name, bestBeforeDate }: Food) {
         </Typography>
       </CardContent>
       <CardActions>
-        <Button size="small">Delete</Button>
+        <Button size="small" onClick={() => delFood(id)}>
+          Delete
+        </Button>
       </CardActions>
     </Card>
   )
