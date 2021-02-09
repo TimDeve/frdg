@@ -1,5 +1,4 @@
-import { Dayjs } from "dayjs"
-import { Food } from "./domain"
+import { Food, NewFood } from "./domain"
 
 interface GetFoodsResponse {
   foods: Food[]
@@ -17,14 +16,17 @@ export async function getFoods(): Promise<Food[]> {
   }
 }
 
-export async function createFood(name: string, date: Dayjs): Promise<void> {
+export async function createFood({
+  name,
+  bestBeforeDate,
+}: NewFood): Promise<void> {
   try {
-    const res = await fetch('/api/v0/foods', {
+    const res = await fetch("/api/v0/foods", {
       method: "POST",
       body: JSON.stringify({
         name,
-        bestBeforeDate: date.format("YYYY-MM-DD")
-      })
+        bestBeforeDate,
+      }),
     })
     if (!res.ok) throw new Error("Failed to create food")
   } catch (e) {

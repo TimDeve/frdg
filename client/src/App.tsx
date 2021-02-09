@@ -24,9 +24,9 @@ import AddIcon from "@material-ui/icons/Add"
 import CloseIcon from "@material-ui/icons/Close"
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers"
 import DayjsUtils from "@date-io/dayjs"
-import dayjs, {Dayjs} from 'dayjs'
+import dayjs, { Dayjs } from "dayjs"
 
-import { deleteFood, getFoods } from "./gateway"
+import * as gateway from "./gateway"
 import { Food } from "./domain"
 
 const theme = createMuiTheme({
@@ -55,7 +55,7 @@ function App() {
   )
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   fab: {
     position: "fixed",
     bottom: theme.spacing(2),
@@ -65,7 +65,7 @@ const useStyles = makeStyles(theme => ({
 
 function Page() {
   const styles = useStyles()
-  const [newFoodOpen, setNewFoodOpen] = useState(true)
+  const [newFoodOpen, setNewFoodOpen] = useState(false)
 
   return (
     <>
@@ -77,7 +77,7 @@ function Page() {
         </Toolbar>
       </AppBar>
       <Container maxWidth="sm">
-        {newFoodOpen && <NewFoodForm />}
+        {newFoodOpen && <NewFoodForm onSuccess={() => setNewFoodOpen(false)} />}
         <FoodList />
       </Container>
       <Fab
@@ -91,16 +91,30 @@ function Page() {
   )
 }
 
-function NewFoodForm() {
+interface NewFoodFormProps {
+  onSuccess: () => void
+}
+function NewFoodForm({ onSuccess }: NewFoodFormProps) {
+  const { mutateAsync: createFood } = useMutation(gateway.createFood, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(gateway.getFoods.name)
+      onSuccess()
+    },
+  })
   const [name, setName] = useState("")
   const [date, setDate] = useState<Dayjs | null>(dayjs())
 
   return (
     <Card style={{ marginTop: "14px", marginBottom: "14px" }}>
       <form
-        onSubmit={e => {
+        onSubmit={(e) => {
           e.preventDefault()
-          console.log(name, date)
+          if (name && date) {
+            createFood({
+              name,
+              bestBeforeDate: date.format("YYYY-MM-DD"),
+            })
+          }
         }}
       >
         <CardContent>
@@ -108,13 +122,13 @@ function NewFoodForm() {
             value={name}
             name="name"
             placeholder="Food Name"
-            onChange={e => setName(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
           />
-          <br/>
+          <br />
           <DatePicker
             name="date"
             value={date}
-            onChange={newDate => {
+            onChange={(newDate) => {
               setDate(newDate)
             }}
           />
@@ -130,7 +144,10 @@ function NewFoodForm() {
 }
 
 function FoodList() {
-  const { isLoading, error, data } = useQuery(getFoods.name, getFoods)
+  const { isLoading, error, data } = useQuery(
+    gateway.getFoods.name,
+    gateway.getFoods
+  )
 
   if (isLoading) {
     return <Loading />
@@ -142,7 +159,7 @@ function FoodList() {
 
   return (
     <>
-      {data.map(food => (
+      {data.map((food) => (
         <FoodItem key={food.id} {...food} />
       ))}
     </>
@@ -150,9 +167,9 @@ function FoodList() {
 }
 
 function FoodItem({ name, bestBeforeDate, id }: Food) {
-  const { mutateAsync: delFood } = useMutation(deleteFood, {
+  const { mutateAsync: delFood } = useMutation(gateway.deleteFood, {
     onSuccess: () => {
-      queryClient.invalidateQueries(getFoods.name)
+      queryClient.invalidateQueries(gateway.getFoods.name)
     },
   })
 

@@ -8,7 +8,7 @@ where
     let foods = sqlx::query_as(
         "SELECT id, name, best_before_date
          FROM foods
-         ORDER BY best_before_date DESC",
+         ORDER BY best_before_date ASC",
     )
     .fetch_all(exec)
     .await?;
