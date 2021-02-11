@@ -1,7 +1,12 @@
+import dayjs from "dayjs"
 import { Food, NewFood } from "./domain"
 
 interface GetFoodsResponse {
-  foods: Food[]
+  foods: {
+    id: number,
+    name: string,
+    bestBeforeDate: string
+  }[]
 }
 
 export async function getFoods(): Promise<Food[]> {
@@ -9,7 +14,11 @@ export async function getFoods(): Promise<Food[]> {
     const res = await fetch("/api/v0/foods")
     if (!res.ok) throw new Error("Failed to fetch foods")
     const json: GetFoodsResponse = await res.json()
-    return json.foods
+    return json.foods.map(({id, name, bestBeforeDate}) => ({
+      id,
+      name,
+      bestBeforeDate: dayjs(bestBeforeDate)
+    }))
   } catch (e) {
     console.error(e)
     throw e
@@ -25,7 +34,7 @@ export async function createFood({
       method: "POST",
       body: JSON.stringify({
         name,
-        bestBeforeDate,
+        bestBeforeDate: bestBeforeDate.format("YYYY-MM-DD"),
       }),
     })
     if (!res.ok) throw new Error("Failed to create food")

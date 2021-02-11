@@ -1,10 +1,12 @@
+import { Dayjs } from "dayjs";
+
 export interface Food {
   id: number
   name: string
-  bestBeforeDate: string
+  bestBeforeDate: Dayjs
 }
 
 export interface NewFood {
   name: string
-  bestBeforeDate: string
+  bestBeforeDate: Dayjs 
 }

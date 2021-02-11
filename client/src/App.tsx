@@ -25,9 +25,14 @@ import CloseIcon from "@material-ui/icons/Close"
 import { DatePicker, MuiPickersUtilsProvider } from "@material-ui/pickers"
 import DayjsUtils from "@date-io/dayjs"
 import dayjs, { Dayjs } from "dayjs"
+import duration from "dayjs/plugin/duration"
+import localizedFormat from "dayjs/plugin/localizedFormat"
 
 import * as gateway from "./gateway"
 import { Food } from "./domain"
+
+dayjs.extend(localizedFormat)
+dayjs.extend(duration)
 
 const theme = createMuiTheme({
   palette: {
@@ -55,16 +60,31 @@ function App() {
   )
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   fab: {
     position: "fixed",
     bottom: theme.spacing(2),
     right: theme.spacing(2),
   },
+  foodItemAlert: ({ date }: { date?: Dayjs }) => {
+    if (!date) {
+      return { color: theme.palette.text.secondary }
+    }
+
+    const daysBeforeBBD = dayjs.duration(dayjs().diff(date)).days()
+
+    if (daysBeforeBBD <= -1) {
+      return { color: theme.palette.text.secondary }
+    } else if (daysBeforeBBD <= 0) {
+      return { color: theme.palette.warning.main }
+    } else {
+      return { color: theme.palette.error.main }
+    }
+  },
 }))
 
 function Page() {
-  const styles = useStyles()
+  const styles = useStyles({})
   const [newFoodOpen, setNewFoodOpen] = useState(false)
 
   return (
@@ -107,12 +127,12 @@ function NewFoodForm({ onSuccess }: NewFoodFormProps) {
   return (
     <Card style={{ marginTop: "14px", marginBottom: "14px" }}>
       <form
-        onSubmit={(e) => {
+        onSubmit={e => {
           e.preventDefault()
           if (name && date) {
             createFood({
               name,
-              bestBeforeDate: date.format("YYYY-MM-DD"),
+              bestBeforeDate: date,
             })
           }
         }}
@@ -122,13 +142,13 @@ function NewFoodForm({ onSuccess }: NewFoodFormProps) {
             value={name}
             name="name"
             placeholder="Food Name"
-            onChange={(e) => setName(e.target.value)}
+            onChange={e => setName(e.target.value)}
           />
           <br />
           <DatePicker
             name="date"
             value={date}
-            onChange={(newDate) => {
+            onChange={newDate => {
               setDate(newDate)
             }}
           />
@@ -159,7 +179,7 @@ function FoodList() {
 
   return (
     <>
-      {data.map((food) => (
+      {data.map(food => (
         <FoodItem key={food.id} {...food} />
       ))}
     </>
@@ -167,7 +187,8 @@ function FoodList() {
 }
 
 function FoodItem({ name, bestBeforeDate, id }: Food) {
-  const { mutateAsync: delFood } = useMutation(gateway.deleteFood, {
+  const styles = useStyles({ date: bestBeforeDate })
+  const { mutateAsync: deleteFood } = useMutation(gateway.deleteFood, {
     onSuccess: () => {
       queryClient.invalidateQueries(gateway.getFoods.name)
     },
@@ -176,15 +197,15 @@ function FoodItem({ name, bestBeforeDate, id }: Food) {
   return (
     <Card style={{ marginTop: "14px", marginBottom: "14px" }}>
       <CardContent>
-        <Typography color="textSecondary" gutterBottom>
-          Best Before: {bestBeforeDate}
+        <Typography className={styles.foodItemAlert} gutterBottom>
+          Best Before: {bestBeforeDate.format("ll")}
         </Typography>
         <Typography variant="h5" component="p">
           {name}
         </Typography>
       </CardContent>
       <CardActions>
-        <Button size="small" onClick={() => delFood(id)}>
+        <Button size="small" onClick={() => deleteFood(id)}>
           Delete
         </Button>
       </CardActions>
