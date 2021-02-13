@@ -5,12 +5,8 @@ use crate::{
     repository, AppContext,
 };
 use serde::Serialize;
+use serde::Deserialize;
 use tide::{Body, Request, Response, Server, StatusCode};
-
-#[derive(Serialize)]
-struct GetFoodResponse {
-    foods: Vec<Food>,
-}
 
 pub fn init(app: &mut Server<AppContext>) {
     let mut foods_api = app.at("/api/v0/foods");
@@ -19,8 +15,20 @@ pub fn init(app: &mut Server<AppContext>) {
     foods_api.at("/:id").delete(delete_food);
 }
 
+#[derive(Deserialize)]
+struct GetFoodQueryParams {
+    limit: Option<i32>
+}
+
+#[derive(Serialize)]
+struct GetFoodResponse {
+    foods: Vec<Food>,
+}
+
 async fn get_foods(req: Request<AppContext>) -> tide::Result<Body> {
-    let foods = repository::get_foods(&req.state().pool).await?;
+    let query: GetFoodQueryParams = req.query()?;
+    let limit = query.limit.unwrap_or(500);
+    let foods = repository::get_foods(&req.state().pool, limit).await?;
     Body::from_json(&GetFoodResponse { foods })
 }
 

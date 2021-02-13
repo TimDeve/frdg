@@ -4,12 +4,14 @@ use sqlx::{Executor, Postgres};
 pub trait PgExecutor<'a>: Executor<'a, Database = Postgres> {}
 impl<'a, T> PgExecutor<'a> for T where T: Executor<'a, Database = Postgres> {}
 
-pub async fn get_foods<'a, E: PgExecutor<'a>>(exec: E) -> anyhow::Result<Vec<Food>> {
+pub async fn get_foods<'a, E: PgExecutor<'a>>(exec: E, limit: i32) -> anyhow::Result<Vec<Food>> {
     let foods = sqlx::query_as(
         "SELECT *
          FROM foods
-         ORDER BY best_before_date ASC",
+         ORDER BY best_before_date ASC
+         LIMIT $1",
     )
+    .bind(limit)
     .fetch_all(exec)
     .await?;
 
