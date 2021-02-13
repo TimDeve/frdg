@@ -1,11 +1,8 @@
 use std::{error::Error, fmt::Display};
 
-use crate::{
-    domain::{Food, NewFood},
-    repository, AppContext,
-};
-use serde::Serialize;
-use serde::Deserialize;
+use crate::domain::{Food, NewFood};
+use crate::{repository, AppContext};
+use serde::{Deserialize, Serialize};
 use tide::{Body, Request, Response, Server, StatusCode};
 
 pub fn init(app: &mut Server<AppContext>) {
@@ -17,7 +14,7 @@ pub fn init(app: &mut Server<AppContext>) {
 
 #[derive(Deserialize)]
 struct GetFoodQueryParams {
-    limit: Option<i32>
+    limit: Option<i32>,
 }
 
 #[derive(Serialize)]
@@ -51,7 +48,7 @@ where
 {
     req.param(param)?.parse().map_err(|err| {
         tide::Error::new(
-            StatusCode::UnprocessableEntity,
+            StatusCode::BadRequest,
             anyhow::Error::new(err).context(format!("Failed to parse url param '{}'", param)),
         )
     })
